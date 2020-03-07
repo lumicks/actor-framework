@@ -6,23 +6,23 @@ from conans.tools import Version
 
 class CAFConan(ConanFile):
     name = "caf"
-    version = "0.17.3"
+    version = "0.17.4"
     description = "An open source implementation of the Actor Model in C++"
     url = "https://github.com/bincrafters/conan-caf"
     homepage = "https://github.com/actor-framework/actor-framework"
     topics = ("conan", "caf", "actor-framework", "actor-model", "pattern-matching", "actors")
     license = ("BSD-3-Clause, BSL-1.0")
     exports = ["LICENSE.md"]
-    exports_sources = ["CMakeLists.txt", "caf.patch"]
+    exports_sources = ["CMakeLists.txt", "cmake/*", "doc/*", "libcaf*"]
     generators = ["cmake"]
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "log_level": ["ERROR", "WARNING", "INFO", "DEBUG", "TRACE", "NONE"],
+        "log_level": ["ERROR", "WARNING", "INFO", "DEBUG", "TRACE", "QUIET"],
         "openssl": [True, False]
     }
-    default_options = {"shared": False, "fPIC": True, "log_level": "NONE", "openssl": True}
+    default_options = {"shared": False, "fPIC": True, "log_level": "QUIET", "openssl": False}
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
@@ -40,11 +40,6 @@ class CAFConan(ConanFile):
             del self.options.shared
             if self.settings.arch == "x86":
                 del self.options.openssl
-
-    def source(self):
-        sha256 = "af235dbb5001a86d716c19f1b597be81bbcf172b87d42e2a38dc3ac97ea3863d"
-        tools.get("{}/archive/{}.tar.gz".format(self.homepage, self.version), sha256=sha256)
-        os.rename("actor-framework-" + self.version, self._source_subfolder)
 
     def requirements(self):
         if self._has_openssl:
@@ -69,13 +64,13 @@ class CAFConan(ConanFile):
         cmake.definitions["CMAKE_CXX_STANDARD"] = "11"
         cmake.definitions["CAF_NO_AUTO_LIBCPP"] = True
         cmake.definitions["CAF_NO_OPENSSL"] = not self._has_openssl
-        for define in ["CAF_NO_EXAMPLES", "CAF_NO_TOOLS", "CAF_NO_UNIT_TESTS", "CAF_NO_PYTHON"]:
+        for define in ["CAF_NO_EXAMPLES", "CAF_NO_TOOLS", "CAF_NO_UNIT_TESTS", "CAF_NO_PYTHON", "CAF_NO_OPENCL"]:
             cmake.definitions[define] = "ON"
         if tools.os_info.is_macos and self.settings.arch == "x86":
             cmake.definitions["CMAKE_OSX_ARCHITECTURES"] = "i386"
         cmake.definitions["CAF_BUILD_STATIC"] = self._is_static
         cmake.definitions["CAF_BUILD_STATIC_ONLY"] = self._is_static
-        cmake.definitions["CAF_LOG_LEVEL"] = self.default_options['log_level'].index(self.options.log_level.value)
+        cmake.definitions["CAF_LOG_LEVEL"] = self.options.log_level
         if self.settings.os == 'Windows':
             cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = True
             cmake.definitions["OPENSSL_MSVC_STATIC_RT"] = True
@@ -89,13 +84,11 @@ class CAFConan(ConanFile):
         return cmake
 
     def build(self):
-        if self.settings.os == "Windows":  # Needed for MSVC and Mingw
-            tools.patch(base_path=self._source_subfolder, patch_file="caf.patch")
         cmake = self._cmake_configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE*", dst="licenses")
         cmake = self._cmake_configure()
         cmake.install()
 
