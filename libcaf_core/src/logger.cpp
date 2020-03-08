@@ -188,6 +188,8 @@ string_view reduce_symbol(std::ostream& out, string_view symbol) {
   return symbol;
 }
 
+#if CAF_LOG_LEVEL >= 0
+
 #if defined(CAF_NO_THREAD_LOCAL)
 
 pthread_key_t s_key;
@@ -229,6 +231,17 @@ inline logger* get_current_logger() {
 }
 
 #endif // CAF_NO_THREAD_LOCAL
+
+#else // CAF_LOG_LEVEL
+
+inline void set_current_logger(logger*) {
+  // nop
+}
+
+inline logger* get_current_logger() {
+  return nullptr;
+}
+#endif // CAF_LOG_LEVEL
 
 } // namespace
 
