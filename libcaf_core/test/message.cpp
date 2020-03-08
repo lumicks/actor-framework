@@ -185,6 +185,27 @@ CAF_TEST(concat) {
   CAF_CHECK_EQUAL(to_string(message::concat(m3, message{}, m1, m2)), to_string(m4));
 }
 
+CAF_TEST(concat_shared) {
+  auto m1 = make_message(get_atom::value);
+  CAF_CHECK(!m1.shared());
+  auto m2 = make_message(uint32_t{1});
+  CAF_CHECK(!m2.shared());
+  auto c1 = message::concat(m1, m2);
+  CAF_CHECK(c1.shared());
+  auto c2 = message::concat(make_message(get_atom::value), make_message(uint32_t{1}));
+  CAF_CHECK(!c2.shared());
+  auto c3 = c2;
+  CAF_CHECK(c2.shared());
+  CAF_CHECK(c3.shared());
+
+  auto c4 = message::concat(m1, make_message(uint32_t{1}));
+  CAF_CHECK(c4.shared());
+  m1.reset();
+  CAF_CHECK(c4.shared());
+  c1.reset();
+  CAF_CHECK(!c4.shared());
+}
+
 namespace {
 
 struct s1 {

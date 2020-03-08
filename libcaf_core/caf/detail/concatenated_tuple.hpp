@@ -70,6 +70,12 @@ public:
 
   error save(size_t pos, serializer& sink) const override;
 
+  bool shared() const noexcept override {
+    return !unique()
+           || std::any_of(data_.begin(), data_.end(),
+                          [](const cow_ptr& p) { return !p->unique(); });
+  }
+
   // -- element access ---------------------------------------------------------
 
   std::pair<message_data*, size_t> select(size_t pos);
