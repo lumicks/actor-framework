@@ -769,9 +769,9 @@ bool scheduled_actor::activate(execution_unit* ctx) {
   } catch (...) {
     CAF_LOG_ERROR("actor died during initialization");
     auto eptr = std::current_exception();
-    quit(call_handler(exception_handler_, this, eptr));
-    finalize();
-    return false;
+    auto err = call_handler(exception_handler_, this, eptr);
+    call_handler(error_handler_, this, err);
+    return !finalize();
   }
 #endif // CAF_NO_EXCEPTIONS
   return true;
@@ -797,7 +797,7 @@ auto scheduled_actor::reactivate(mailbox_element& x) -> activation_result {
       auto rp = make_response_promise();
       rp.deliver(err);
     }
-    quit(std::move(err));
+    call_handler(error_handler_, this, err);
   };
   try {
 #endif // CAF_NO_EXCEPTIONS
@@ -823,8 +823,10 @@ auto scheduled_actor::reactivate(mailbox_element& x) -> activation_result {
     CAF_LOG_INFO("actor died because of an unknown exception");
     handle_exception(std::current_exception());
   }
-  finalize();
-  return activation_result::terminated;
+  if (finalize()) {
+    return activation_result::terminated;
+  }
+  return activation_result::success;
 #endif // CAF_NO_EXCEPTIONS
 }
 

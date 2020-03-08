@@ -79,6 +79,58 @@ CAF_TEST(test_custom_exception_handler) {
   self->wait_for(testee1, testee2, testee3);
 }
 
+CAF_TEST(test_exception_recovery) {
+  actor_system_config cfg;
+  actor_system system{cfg};
+  auto exception_handler = [](std::exception_ptr& eptr) -> error {
+    try {
+      std::rethrow_exception(eptr);
+    } catch (std::runtime_error&) {
+      return sec::runtime_error;
+    } catch (std::logic_error&) {
+      return sec::none;
+    } catch (...) {
+      return exit_reason::unhandled_exception;
+    }
+  };
+  auto error_handler = [](scheduled_actor* ptr, const error& err) {
+    if (err) {
+      ptr->quit(err);
+    }
+  };
+
+  scoped_actor self{system};
+  using throw_atom = atom_constant<atom("throw")>;
+  auto testee1 = self->spawn<monitored>([=](event_based_actor* eb_self) {
+    eb_self->set_exception_handler(exception_handler);
+    eb_self->set_error_handler(error_handler);
+    return caf::behavior([](throw_atom) -> int {
+      throw std::runtime_error("ping");
+    });
+  });
+  auto testee2 = self->spawn<monitored>([=](event_based_actor* eb_self) {
+    eb_self->set_exception_handler(exception_handler);
+    eb_self->set_error_handler(error_handler);
+    return caf::behavior([](throw_atom) -> int {
+      throw std::logic_error("pong");
+    });
+  });
+
+  auto check_error = [&](const actor& a, const error& expected) {
+    self->request(a, infinite, throw_atom::value)
+      .receive([](int i) { CAF_FAIL(i); },
+               [&](const error& e) { CAF_CHECK_EQUAL(e, expected); });
+  };
+
+  check_error(testee1, sec::runtime_error);
+  check_error(testee1, sec::request_receiver_down);
+  check_error(testee2, sec::none);
+  check_error(testee2, sec::none);
+
+  anon_send_exit(testee2, exit_reason::kill);
+  self->wait_for(testee1, testee2);
+}
+
 #else // CAF_NO_EXCEPTIONS
 
 CAF_TEST(no_exceptions_dummy) {
