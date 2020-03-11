@@ -295,10 +295,6 @@ private:
   size_t size_;
 };
 
-} // namespace caf
-
-namespace std {
-
 std::ostream& operator<<(std::ostream& out, caf::string_view);
 
-} // namespace std
+} // namespace caf

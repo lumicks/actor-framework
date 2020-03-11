@@ -315,14 +315,10 @@ size_type string_view::find_last_not_of(const_pointer str,
   return find_last_not_of(string_view{str, strlen(str)}, pos);
 }
 
-} // namespace caf
-
-namespace std {
-
 std::ostream& operator<<(std::ostream& out, caf::string_view str) {
   for (auto ch : str)
     out.put(ch);
   return out;
 }
 
-} // namespace std
+} // namespace caf
