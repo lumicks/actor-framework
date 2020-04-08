@@ -20,9 +20,12 @@ class CAFConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "log_level": ["ERROR", "WARNING", "INFO", "DEBUG", "TRACE", "QUIET"],
-        "openssl": [True, False]
+        "openssl": [True, False],
+        "io_module": [True, False],
+        "always_allow_unsafe": [True, False],
     }
-    default_options = {"shared": False, "fPIC": True, "log_level": "QUIET", "openssl": False}
+    default_options = {"shared": False, "fPIC": True, "log_level": "QUIET", "openssl": False,
+                       "io_module": False, "always_allow_unsafe": True}
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
@@ -80,6 +83,8 @@ class CAFConan(ConanFile):
             cmake.definitions["PTHREAD_LIBRARIES"] = "-pthread"
             if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.0":
                 cmake.definitions["CMAKE_SHARED_LINKER_FLAGS"] = "-pthread"
+        cmake.definitions["CAF_NO_IO"] = not self.options.io_module
+        cmake.definitions["CAF_ALWAYS_ALLOW_UNSAFE"] = self.options.always_allow_unsafe
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
@@ -94,7 +99,9 @@ class CAFConan(ConanFile):
 
     def package_info(self):
         suffix = "_static" if self._is_static else ""
-        self.cpp_info.libs = ["caf_io%s" % suffix, "caf_core%s" % suffix]
+        self.cpp_info.libs = ["caf_core%s" % suffix]
+        if self.options.io_module:
+            self.cpp_info.libs += ["caf_io%s" % suffix]
         if self._has_openssl:
             self.cpp_info.libs.append("caf_openssl%s" % suffix)
         if self.settings.os == "Windows":
