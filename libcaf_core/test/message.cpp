@@ -310,8 +310,20 @@ CAF_TEST(no_inspect) {
     NotInspectable(int n) : n(n) {}
   };
 
+  struct Iterable {
+    using value_type = int;
+
+    std::vector<value_type> v = {};
+
+    std::vector<value_type>::iterator begin() { return v.begin(); }
+    std::vector<value_type>::iterator end() { return v.end(); }
+    std::vector<value_type>::const_iterator begin() const { return v.begin(); }
+    std::vector<value_type>::const_iterator end() const { return v.end(); }
+  };
+
   auto msg1 = make_message(NotInspectable{1});
   auto msg2 = make_message(std::vector<NotInspectable>{});
+  auto msg3 = make_message(Iterable{});
 }
 
 #endif // CAF_ALWAYS_ALLOW_UNSAFE

@@ -348,7 +348,7 @@ public:
     && detail::is_serializable<typename T::value_type>::value,
     error
   >::type
-  apply(T& xs) {
+  apply(T& xs, decltype(xs.size()) = 0) {
     return apply_sequence(dref(), xs);
   }
 
