@@ -300,3 +300,15 @@ CAF_TEST(arrays_to_string) {
   CAF_CHECK_EQUAL(to_string(msg2), "([[1, 10], [2, 20], [3, 30], [4, 40]])");
   CAF_CHECK_EQUAL(msg_as_string(s3{}), "([1, 2, 3, 4])");
 }
+
+#ifdef CAF_ALWAYS_ALLOW_UNSAFE
+
+CAF_TEST(no_inspect) {
+  struct NotInspectable {
+    int n = 1;
+  };
+
+  auto msg = make_message(NotInspectable{});
+}
+
+#endif // CAF_ALWAYS_ALLOW_UNSAFE

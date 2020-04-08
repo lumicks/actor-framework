@@ -469,6 +469,14 @@ public:
     return inspect(dref(), x);
   }
 
+#ifdef CAF_ALWAYS_ALLOW_UNSAFE
+  /// Overload for non-inspectable types
+  template <class... Ts>
+  error apply(Ts&...) {
+    return none;
+  }
+#endif // CAF_ALWAYS_ALLOW_UNSAFE
+
   // -- operator() -------------------------------------------------------------
 
   error operator()() {

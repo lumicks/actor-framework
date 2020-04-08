@@ -52,12 +52,14 @@ struct unbox_message_element<actor_control_block*, 0> {
   using type = strong_actor_ptr;
 };
 
+#ifndef CAF_ALWAYS_ALLOW_UNSAFE
 ///
 template <class T>
 struct is_serializable_or_whitelisted {
   static constexpr bool value = detail::is_serializable<T>::value
                                 || allowed_unsafe_message_type<T>::value;
 };
+#endif // CAF_ALWAYS_ALLOW_UNSAFE
 
 /// Returns a new `message` containing the values `(x, xs...)`.
 /// @relates message
@@ -78,6 +80,7 @@ make_message(T&& x, Ts&&... xs) {
         typename strip_and_convert<Ts>::type
       >::type...
     >;
+#ifndef CAF_ALWAYS_ALLOW_UNSAFE
   static_assert(tl_forall<stored_types, is_serializable_or_whitelisted>::value,
                 "at least one type is neither inspectable via "
                 "inspect(Inspector&, T&) nor serializable via "
@@ -86,6 +89,7 @@ make_message(T&& x, Ts&&... xs) {
                 "you can whitelist individual types by "
                 "specializing `caf::allowed_unsafe_message_type<T>` "
                 "or using the macro CAF_ALLOW_UNSAFE_MESSAGE_TYPE");
+#endif // CAF_ALWAYS_ALLOW_UNSAFE
   using storage = typename tl_apply<stored_types, tuple_vals>::type;
   auto ptr = make_counted<storage>(std::forward<T>(x), std::forward<Ts>(xs)...);
   return message{detail::message_data::cow_ptr{std::move(ptr)}};

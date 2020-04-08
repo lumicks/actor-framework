@@ -170,6 +170,7 @@ pretty_no("CAF_NO_OPENSSL")
 pretty_no("CAF_NO_PYTHON")
 pretty_no("CAF_NO_TOOLS")
 pretty_no("CAF_NO_SUMMARY")
+pretty_no("CAF_ALWAYS_ALLOW_UNSAFE")
 
 if(NOT CAF_NO_IO)
   set(CAF_NO_IO no)
@@ -761,6 +762,7 @@ if(NOT CAF_NO_SUMMARY)
         "\nLog level:             ${CAF_LOG_LEVEL}"
         "\nWith mem. mgmt.:       ${CAF_BUILD_MEM_MANAGEMENT}"
         "\nWith exceptions:       ${CAF_BUILD_WITH_EXCEPTIONS}"
+        "\nAlways allow unsafe:   ${CAF_ALWAYS_ALLOW_UNSAFE}"
         "\n"
         "\nBuild I/O module:      ${CAF_BUILD_IO}"
         "\nBuild tools:           ${CAF_BUILD_TOOLS}"
