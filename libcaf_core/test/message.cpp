@@ -305,10 +305,13 @@ CAF_TEST(arrays_to_string) {
 
 CAF_TEST(no_inspect) {
   struct NotInspectable {
-    int n = 1;
+    int n;
+
+    NotInspectable(int n) : n(n) {}
   };
 
-  auto msg = make_message(NotInspectable{});
+  auto msg1 = make_message(NotInspectable{1});
+  auto msg2 = make_message(std::vector<NotInspectable>{});
 }
 
 #endif // CAF_ALWAYS_ALLOW_UNSAFE

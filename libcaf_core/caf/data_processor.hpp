@@ -344,7 +344,8 @@ public:
   typename std::enable_if<
     detail::is_iterable<T>::value
     && !detail::has_serialize<T>::value
-    && !detail::is_inspectable<Derived, T>::value,
+    && !detail::is_inspectable<Derived, T>::value
+    && detail::is_serializable<typename T::value_type>::value,
     error
   >::type
   apply(T& xs) {
