@@ -6,13 +6,13 @@ from conans.tools import Version
 
 class CAFConan(ConanFile):
     name = "caf"
-    version = "0.17.4-lmx.5"
+    version = "0.17.4-lmx.6"
     description = "An open source implementation of the Actor Model in C++"
     url = "https://github.com/bincrafters/conan-caf"
     homepage = "https://github.com/actor-framework/actor-framework"
     topics = ("conan", "caf", "actor-framework", "actor-model", "pattern-matching", "actors")
     license = ("BSD-3-Clause, BSL-1.0")
-    exports = ["LICENSE.md"]
+    exports = ["LICENSE"]
     exports_sources = ["CMakeLists.txt", "cmake/*", "doc/*", "libcaf*"]
     generators = ["cmake"]
     settings = "os", "compiler", "build_type", "arch"
