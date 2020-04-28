@@ -150,6 +150,9 @@
 #  endif
 #elif defined(_MSC_VER)
 #  define CAF_MSVC
+#  if !defined(_MSVC_TRADITIONAL) || _MSVC_TRADITIONAL
+#    define CAF_MSVC_TRADITIONAL_PP
+#  endif
 #  define CAF_LIKELY(x) x
 #  define CAF_UNLIKELY(x) x
 #  define CAF_DEPRECATED

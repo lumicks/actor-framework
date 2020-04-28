@@ -57,7 +57,7 @@ void log_cstring_error(const char* cstring);
 
 #endif // CAF_NO_EXCEPTIONS
 
-#ifdef CAF_MSVC
+#ifdef CAF_MSVC_TRADITIONAL_PP
 
 /// Throws an exception if `CAF_NO_EXCEPTIONS` is undefined, otherwise calls
 /// abort() after printing a given message.
@@ -65,11 +65,11 @@ void log_cstring_error(const char* cstring);
   CAF_PP_CAT(CAF_PP_OVERLOAD(CAF_RAISE_ERROR_IMPL_, __VA_ARGS__)(__VA_ARGS__), \
              CAF_PP_EMPTY())
 
-#else // CAF_MSVC
+#else // CAF_MSVC_TRADITIONAL_PP
 
 /// Throws an exception if `CAF_NO_EXCEPTIONS` is undefined, otherwise calls
 /// abort() after printing a given message.
 #define CAF_RAISE_ERROR(...)                                                   \
   CAF_PP_OVERLOAD(CAF_RAISE_ERROR_IMPL_, __VA_ARGS__)(__VA_ARGS__)
 
-#endif // CAF_MSVC
+#endif // CAF_MSVC_TRADITIONAL_PP

@@ -208,7 +208,7 @@
     CAF_FSM_EPSILON_IMPL2(fsm_call, target)                                    \
   }
 
-#ifdef CAF_MSVC
+#ifdef CAF_MSVC_TRADITIONAL_PP
 
 /// Defines a terminal state in the FSM.
 #define term_state(...)                                                        \
@@ -243,7 +243,7 @@
   CAF_PP_CAT(CAF_PP_OVERLOAD(CAF_FSM_EPSILON_IMPL, __VA_ARGS__)(__VA_ARGS__),  \
              CAF_PP_EMPTY())
 
-#else // CAF_MSVC
+#else // CAF_MSVC_TRADITIONAL_PP
 
 /// Defines a terminal state in the FSM.
 #define term_state(...)                                                        \
@@ -271,7 +271,7 @@
 #define fsm_epsilon(...)                                                       \
   CAF_PP_OVERLOAD(CAF_FSM_EPSILON_IMPL, __VA_ARGS__)(__VA_ARGS__)
 
-#endif // CAF_MSVC
+#endif // CAF_MSVC_TRADITIONAL_PP
 
 /// Makes a transition into another state if the `statement` is true.
 #define transition_if(statement, ...)                                          \
