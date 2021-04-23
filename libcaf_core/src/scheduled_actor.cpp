@@ -888,7 +888,7 @@ void scheduled_actor::push_to_cache(mailbox_element_ptr ptr) {
     q.inc_total_task_size(q.policy().task_size(*ptr));
     q.cache().push_back(ptr.release());
   } else {
-    auto& q = std::get<normal_queue_index>(qs);
+    auto& q = std::get<urgent_queue_index>(qs);
     q.inc_total_task_size(q.policy().task_size(*ptr));
     q.cache().push_back(ptr.release());
   }
