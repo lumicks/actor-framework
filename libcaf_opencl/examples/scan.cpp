@@ -225,7 +225,7 @@ int main() {
     // ---- scan actors ----
     auto phase1 = mngr.spawn(
       prog, kernel_name_1, ndr,
-      [nd_conf](nd_range& range, message& msg) -> optional<message> {
+      [nd_conf](nd_range& range, message& msg) -> caf::optional<message> {
         return msg.apply([&](uvec& vec) {
           auto size = vec.size();
           range = nd_conf(size);
@@ -239,7 +239,7 @@ int main() {
     );
     auto phase2 = mngr.spawn(
       prog, kernel_name_2, ndr,
-      [nd_conf](nd_range& range, message& msg) -> optional<message> {
+      [nd_conf](nd_range& range, message& msg) -> caf::optional<message> {
         return msg.apply([&](uref& data, uref& incs) {
           auto size = incs.size();
           range = nd_conf(size);
@@ -252,7 +252,7 @@ int main() {
     );
     auto phase3 = mngr.spawn(
       prog, kernel_name_3, ndr,
-      [nd_conf](nd_range& range, message& msg) -> optional<message> {
+      [nd_conf](nd_range& range, message& msg) -> caf::optional<message> {
         return msg.apply([&](uref& data, uref& incs) {
           auto size = incs.size();
           range = nd_conf(size);

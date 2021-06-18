@@ -61,13 +61,13 @@ void set_foo_fun(foobar& x, const int& value) {
 }
 
 struct get_foo_t {
-  int operator()(const foobar& x) const noexcept {
+  int operator()(const foobar& x) const {
     return x.foo;
   }
 };
 
 struct set_foo_t {
-  int& operator()(foobar& x, int value) const noexcept {
+  int& operator()(foobar& x, int value) const {
     x.foo = value;
     return x.foo;
   }

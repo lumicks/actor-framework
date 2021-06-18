@@ -366,7 +366,7 @@ void test_opencl(actor_system& sys) {
     }, others >> wrong_msg
   );
   const matrix_type expected2(move(expected1));
-  auto map_arg = [](message& msg) -> optional<message> {
+  auto map_arg = [](message& msg) -> caf::optional<message> {
     return msg.apply(
       [](matrix_type& mx) {
         return make_message(move(mx.data()));
@@ -703,7 +703,7 @@ void test_in_val_out_val(actor_system& sys) {
   }, others >> wrong_msg);
   // Wrap message in user-defined type and use mapping functions
   const matrix_type res2(move(res1));
-  auto map_arg = [](message& msg) -> optional<message> {
+  auto map_arg = [](message& msg) -> caf::optional<message> {
     return msg.apply([](matrix_type& mx) {
       return make_message(move(mx.data()));
     });
