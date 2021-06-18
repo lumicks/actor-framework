@@ -339,9 +339,9 @@ if (NOT caf_is_subproject)
   if(NOT CAF_NO_AUTO_LIBCPP AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CXXFLAGS_BACKUP "${CMAKE_CXX_FLAGS}")
     if(NOT APPLE AND NOT WIN32)
-      set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ -pthread")
+      set(CMAKE_CXX_FLAGS "-stdlib=libc++ -pthread")
     else()
-      set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
+      set(CMAKE_CXX_FLAGS "-stdlib=libc++")
     endif()
     try_run(ProgramResult
             CompilationSucceeded
@@ -398,11 +398,11 @@ if (NOT caf_is_subproject)
   endif()
   # check if the user provided CXXFLAGS, set defaults otherwise
   if(NOT CMAKE_CXX_FLAGS)
-    set(CMAKE_CXX_FLAGS                   "-std=c++11 -Wextra -Wall -pedantic ${EXTRA_FLAGS}")
+    set(CMAKE_CXX_FLAGS                   "-Wextra -Wall -pedantic ${EXTRA_FLAGS}")
   endif()
   if (NOT "${CMAKE_CXX_FLAGS}" MATCHES "-std=")
     message(STATUS "Supplied CXXFLAGS do not contain a C++ standard, setting std to c++11")
-    set(CMAKE_CXX_FLAGS                   "-std=c++11 ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS                   "${CMAKE_CXX_FLAGS}")
   endif()
   if(NOT CMAKE_CXX_FLAGS_DEBUG)
     set(CMAKE_CXX_FLAGS_DEBUG             "-O0 -g")
@@ -773,6 +773,7 @@ if(NOT CAF_NO_SUMMARY)
         "\nBuild Python:          ${CAF_BUILD_PYTHON}"
         "\n"
         "\nCXX:                   ${CMAKE_CXX_COMPILER}"
+        "\nCXX_STANDARD:          ${CMAKE_CXX_STANDARD}"
         "\nCXXFLAGS:              ${ALL_CXX_FLAGS}"
         "\nLINKER_FLAGS (shared)  ${ALL_LD_FLAGS}"
         "\n"

@@ -64,7 +64,7 @@ class CAFConan(ConanFile):
 
     def _cmake_configure(self):
         cmake = CMake(self)
-        cmake.definitions["CMAKE_CXX_STANDARD"] = "11"
+        cmake.definitions["CMAKE_CXX_STANDARD"] = self.settings.compiler.cppstd
         cmake.definitions["CAF_NO_AUTO_LIBCPP"] = True
         cmake.definitions["CAF_NO_OPENSSL"] = not self._has_openssl
         for define in ["CAF_NO_EXAMPLES", "CAF_NO_TOOLS", "CAF_NO_UNIT_TESTS", "CAF_NO_PYTHON", "CAF_NO_OPENCL"]:
