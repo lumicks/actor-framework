@@ -627,6 +627,12 @@ scheduled_actor::categorize(mailbox_element& x) {
   }
 }
 
+namespace {
+bool ordinary_invoke(scheduled_actor*, behavior& f, mailbox_element& in) {
+    return f(in.content()) != none;
+}
+} // namespace
+
 invoke_message_result scheduled_actor::consume(mailbox_element& x) {
   CAF_LOG_TRACE(CAF_ARG(x));
   current_element_ = &x;
@@ -634,23 +640,15 @@ invoke_message_result scheduled_actor::consume(mailbox_element& x) {
   CAF_BEFORE_PROCESSING(this, x);
   // Wrap the actual body for the function.
   auto body = [this, &x] {
-    // Helper function for dispatching a message to a response handler.
-    using ptr_t = scheduled_actor*;
-    using fun_t = bool (*)(ptr_t, behavior&, mailbox_element&);
-    auto ordinary_invoke = [](ptr_t, behavior& f, mailbox_element& in) -> bool {
-      return f(in.content()) != none;
-    };
-    auto select_invoke_fun = [&]() -> fun_t { return ordinary_invoke; };
     // Short-circuit awaited responses.
     if (!awaited_responses_.empty()) {
-      auto invoke = select_invoke_fun();
       auto& pr = awaited_responses_.front();
       // skip all messages until we receive the currently awaited response
       if (x.mid != pr.first)
         return invoke_message_result::skipped;
       auto f = std::move(pr.second);
       awaited_responses_.pop_front();
-      if (!invoke(this, f, x)) {
+      if (!ordinary_invoke(this, f, x)) {
         // try again with error if first attempt failed
         auto msg = make_message(
           make_error(sec::unexpected_response, x.move_content_to_message()));
@@ -660,14 +658,13 @@ invoke_message_result scheduled_actor::consume(mailbox_element& x) {
     }
     // Handle multiplexed responses.
     if (x.mid.is_response()) {
-      auto invoke = select_invoke_fun();
       auto mrh = multiplexed_responses_.find(x.mid);
       // neither awaited nor multiplexed, probably an expired timeout
       if (mrh == multiplexed_responses_.end())
         return invoke_message_result::dropped;
       auto bhvr = std::move(mrh->second);
       multiplexed_responses_.erase(mrh);
-      if (!invoke(this, bhvr, x)) {
+      if (!ordinary_invoke(this, bhvr, x)) {
         // try again with error if first attempt failed
         auto msg = make_message(
           make_error(sec::unexpected_response, x.move_content_to_message()));

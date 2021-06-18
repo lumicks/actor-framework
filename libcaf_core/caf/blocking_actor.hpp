@@ -67,6 +67,9 @@ struct is_blocking_requester<blocking_actor> : std::true_type { };
 } // namespace mixin
 
 namespace caf {
+namespace workaround {
+inline void wait_for_nop(atom_constant<atom("waitFor")>) {}
+}
 
 /// A thread-mapped or context-switching actor using a blocking
 /// receive rather than a behavior-stack based message processing.
@@ -343,17 +346,12 @@ public:
   /// Blocks this actor until all `xs...` have terminated.
   template <class... Ts>
   void wait_for(Ts&&... xs) {
-    using wait_for_atom = atom_constant<atom("waitFor")>;
     size_t expected = 0;
     size_t i = 0;
     size_t attach_results[] = {attach_functor(xs)...};
     for (auto res : attach_results)
       expected += res;
-    receive_for(i, expected)(
-      [](wait_for_atom) {
-        // nop
-      }
-    );
+    receive_for(i, expected)(&workaround::wait_for_nop);
   }
 
   /// Sets a user-defined exit reason `err`. This reason
