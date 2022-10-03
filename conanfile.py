@@ -6,7 +6,7 @@ from conans.tools import Version
 
 class CAFConan(ConanFile):
     name = "caf"
-    version = "0.17.4-lmx.10"
+    version = "0.17.4-lmx.11"
     description = "An open source implementation of the Actor Model in C++"
     url = "https://github.com/bincrafters/conan-caf"
     homepage = "https://github.com/actor-framework/actor-framework"
@@ -98,13 +98,8 @@ class CAFConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        suffix = "_static" if self._is_static else ""
-        self.cpp_info.libs = ["caf_core%s" % suffix]
-        if self.options.io_module:
-            self.cpp_info.libs += ["caf_io%s" % suffix]
-        if self._has_openssl:
-            self.cpp_info.libs.append("caf_openssl%s" % suffix)
+        self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
-            self.cpp_info.libs.extend(["ws2_32", "iphlpapi", "psapi"])
+            self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi", "psapi"])
         elif self.settings.os == "Linux":
-            self.cpp_info.libs.extend(['-pthread', 'm'])
+            self.cpp_info.system_libs.extend(['-pthread', 'm'])
