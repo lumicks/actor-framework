@@ -27,8 +27,9 @@ namespace caf {
 template <class... Ts>
 class composed_behavior : public Ts... {
 public:
+  template<class T> using Signatures = typename T::signatures; // Alias required for msvc 17.6.5
   using signatures =
-    typename detail::tl_union<typename Ts::signatures...>::type;
+    typename detail::tl_union<Signatures<Ts>...>::type;
 
   using handle_type =
     typename detail::tl_apply<
