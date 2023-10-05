@@ -270,7 +270,7 @@ void client_repl(actor_system& system, const config& cfg) {
           cout << R"(")" << arg2 << R"(" > )"
                << std::numeric_limits<uint16_t>::max() << endl;
         else
-          anon_send(client, connect_atom::value, move(arg1),
+          anon_send(client, connect_atom::value, std::move(arg1),
                     static_cast<uint16_t>(lport));
       }
       else {
