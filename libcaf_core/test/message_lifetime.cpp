@@ -57,7 +57,7 @@ public:
       : event_based_actor(cfg),
         aut_(std::move(aut)),
         msg_(make_message(1, 2, 3)) {
-    set_down_handler([=](down_msg& dm) {
+    set_down_handler([=, this](down_msg& dm) {
       CAF_CHECK_EQUAL(dm.reason, exit_reason::normal);
       CAF_CHECK_EQUAL(dm.source, aut_.address());
       quit();

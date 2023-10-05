@@ -61,7 +61,7 @@ public:
   event_testee(actor_config& cfg) : event_based_actor(cfg) {
     inc_actor_instances();
     wait4string.assign(
-      [=](const std::string&) {
+      [=, this](const std::string&) {
         become(wait4int);
       },
       [=](get_atom) {
@@ -69,7 +69,7 @@ public:
       }
     );
     wait4float.assign(
-      [=](float) {
+      [=, this](float) {
         become(wait4string);
       },
       [=](get_atom) {
@@ -77,7 +77,7 @@ public:
       }
     );
     wait4int.assign(
-      [=](int) {
+      [=, this](int) {
         become(wait4float);
       },
       [=](get_atom) {
@@ -113,7 +113,7 @@ actor spawn_event_testee2(scoped_actor& parent) {
     }
     behavior wait4timeout(int remaining) {
       return {
-        after(chrono::milliseconds(1)) >> [=] {
+        after(chrono::milliseconds(1)) >> [=, this] {
           CAF_MESSAGE("remaining: " << to_string(remaining));
           if (remaining == 1) {
             send(parent, ok_atom::value);
@@ -200,7 +200,7 @@ public:
 
   behavior make_behavior() override {
     return {
-      after(chrono::milliseconds(10)) >> [=] {
+      after(chrono::milliseconds(10)) >> [=, this] {
         unbecome();
       }
     };
@@ -478,7 +478,7 @@ CAF_TEST(constructor_attach) {
     testee(actor_config& cfg, actor buddy)
         : event_based_actor(cfg),
           buddy_(buddy) {
-      attach_functor([=](const error& reason) {
+      attach_functor([=, this](const error& reason) {
         send(buddy, ok_atom::value, reason);
       });
     }
@@ -504,19 +504,19 @@ CAF_TEST(constructor_attach) {
         : event_based_actor(cfg),
           downs_(0),
           testee_(spawn<testee, monitored>(this)) {
-      set_down_handler([=](down_msg& msg) {
+      set_down_handler([=, this](down_msg& msg) {
         CAF_CHECK_EQUAL(msg.reason, exit_reason::user_shutdown);
         if (++downs_ == 2)
           quit(msg.reason);
       });
-      set_exit_handler([=](exit_msg& msg) {
+      set_exit_handler([=, this](exit_msg& msg) {
         send_exit(testee_, std::move(msg.reason));
       });
     }
 
     behavior make_behavior() override {
       return {
-        [=](ok_atom, const error& reason) {
+        [=, this](ok_atom, const error& reason) {
           CAF_CHECK_EQUAL(reason, exit_reason::user_shutdown);
           if (++downs_ == 2)
             quit(reason);

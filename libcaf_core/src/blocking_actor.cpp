@@ -320,7 +320,7 @@ size_t blocking_actor::attach_functor(const strong_actor_ptr& ptr) {
   if (!ptr)
     return 0;
   actor self{this};
-  ptr->get()->attach_functor([=](const error&) {
+  ptr->get()->attach_functor([=, this](const error&) {
     anon_send(self, wait_for_atom::value);
   });
   return 1;

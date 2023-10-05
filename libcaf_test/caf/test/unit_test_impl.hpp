@@ -49,7 +49,7 @@ public:
 
 private:
   watchdog(int secs) {
-    thread_ = std::thread{[=] {
+    thread_ = std::thread{[=, this] {
       auto tp =
         std::chrono::high_resolution_clock::now() + std::chrono::seconds(secs);
         std::unique_lock<std::mutex> guard{mtx_};

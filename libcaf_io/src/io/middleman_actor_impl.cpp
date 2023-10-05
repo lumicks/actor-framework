@@ -43,7 +43,7 @@ namespace io {
 middleman_actor_impl::middleman_actor_impl(actor_config& cfg,
                                            actor default_broker)
   : middleman_actor::base(cfg), broker_(std::move(default_broker)) {
-  set_down_handler([=](down_msg& dm) {
+  set_down_handler([=, this](down_msg& dm) {
     auto i = cached_tcp_.begin();
     auto e = cached_tcp_.end();
     while (i != e) {
@@ -76,18 +76,18 @@ const char* middleman_actor_impl::name() const {
 auto middleman_actor_impl::make_behavior() -> behavior_type {
   CAF_LOG_TRACE("");
   return {
-    [=](publish_atom, uint16_t port, strong_actor_ptr& whom, mpi_set& sigs,
+    [=, this](publish_atom, uint16_t port, strong_actor_ptr& whom, mpi_set& sigs,
         std::string& addr, bool reuse) -> put_res {
       CAF_LOG_TRACE("");
       return put(port, whom, sigs, addr.c_str(), reuse);
     },
-    [=](open_atom, uint16_t port, std::string& addr, bool reuse) -> put_res {
+    [=, this](open_atom, uint16_t port, std::string& addr, bool reuse) -> put_res {
       CAF_LOG_TRACE("");
       strong_actor_ptr whom;
       mpi_set sigs;
       return put(port, whom, sigs, addr.c_str(), reuse);
     },
-    [=](connect_atom, std::string& hostname, uint16_t port) -> get_res {
+    [=, this](connect_atom, std::string& hostname, uint16_t port) -> get_res {
       CAF_LOG_TRACE(CAF_ARG(hostname) << CAF_ARG(port));
       auto rp = make_response_promise();
       endpoint key{std::move(hostname), port};
@@ -116,7 +116,7 @@ auto middleman_actor_impl::make_behavior() -> behavior_type {
       pending_.emplace(key, std::move(tmp));
       request(broker_, infinite, connect_atom::value, std::move(ptr), port)
         .then(
-          [=](node_id& nid, strong_actor_ptr& addr, mpi_set& sigs) {
+          [=, this](node_id& nid, strong_actor_ptr& addr, mpi_set& sigs) {
             auto i = pending_.find(key);
             if (i == pending_.end())
               return;
@@ -130,7 +130,7 @@ auto middleman_actor_impl::make_behavior() -> behavior_type {
               promise.deliver(res);
             pending_.erase(i);
           },
-          [=](error& err) {
+          [=, this](error& err) {
             auto i = pending_.find(key);
             if (i == pending_.end())
               return;
@@ -140,17 +140,17 @@ auto middleman_actor_impl::make_behavior() -> behavior_type {
           });
       return get_delegated{};
     },
-    [=](unpublish_atom atm, actor_addr addr, uint16_t p) -> del_res {
+    [=, this](unpublish_atom atm, actor_addr addr, uint16_t p) -> del_res {
       CAF_LOG_TRACE("");
       delegate(broker_, atm, std::move(addr), p);
       return {};
     },
-    [=](close_atom atm, uint16_t p) -> del_res {
+    [=, this](close_atom atm, uint16_t p) -> del_res {
       CAF_LOG_TRACE("");
       delegate(broker_, atm, p);
       return {};
     },
-    [=](spawn_atom atm, node_id& nid, std::string& str, message& msg,
+    [=, this](spawn_atom atm, node_id& nid, std::string& str, message& msg,
         std::set<std::string>& ifs) -> delegated<strong_actor_ptr> {
       CAF_LOG_TRACE("");
       delegate(broker_, forward_atom::value, nid, atom("SpawnServ"),
@@ -158,7 +158,7 @@ auto middleman_actor_impl::make_behavior() -> behavior_type {
                             std::move(ifs)));
       return {};
     },
-    [=](get_atom atm,
+    [=, this](get_atom atm,
         node_id nid) -> delegated<node_id, std::string, uint16_t> {
       CAF_LOG_TRACE("");
       delegate(broker_, atm, std::move(nid));
