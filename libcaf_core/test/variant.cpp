@@ -81,7 +81,7 @@ struct tostring_visitor : static_visitor<string> {
 macro_repeat20(i_n)
 
 // a variant with 20 element types
-using v20 = variant<i01, i02, i03, i04, i05, i06, i07, i08, i09, i10,
+using v20 = caf::variant<i01, i02, i03, i04, i05, i06, i07, i08, i09, i10,
                     i11, i12, i13, i14, i15, i16, i17, i18, i19, i20>;
 
 #define announce_n(n) cfg.add_message_type<i##n>(CAF_STR(i##n));
@@ -117,9 +117,9 @@ CAF_TEST(copying_moving_roundtrips) {
   macro_repeat20(announce_n)
   actor_system sys{cfg};
   // default construction
-  variant<none_t> x1;
+  caf::variant<none_t> x1;
   CAF_CHECK_EQUAL(x1, none);
-  variant<int, none_t> x2;
+  caf::variant<int, none_t> x2;
   CAF_CHECK_EQUAL(x2, 0);
   v20 x3;
   CAF_CHECK_EQUAL(x3, i01{0});
@@ -139,11 +139,11 @@ struct test_visitor {
 } // namespace
 
 CAF_TEST(constructors) {
-  variant<int, string> a{42};
-  variant<string, atom_value> b{atom("foo")};
-  variant<float, int, string> c{string{"bar"}};
-  variant<int, string, double> d{123};
-  variant<bool, uint8_t> e{uint8_t{252}};
+  caf::variant<int, string> a{42};
+  caf::variant<string, atom_value> b{atom("foo")};
+  caf::variant<float, int, string> c{string{"bar"}};
+  caf::variant<int, string, double> d{123};
+  caf::variant<bool, uint8_t> e{uint8_t{252}};
   CAF_CHECK_EQUAL(a, 42);
   CAF_CHECK_EQUAL(b, atom("foo"));
   CAF_CHECK_EQUAL(d, 123);
@@ -152,10 +152,10 @@ CAF_TEST(constructors) {
 }
 
 CAF_TEST(n_ary_visit) {
-  variant<int, string> a{42};
-  variant<string, atom_value> b{atom("foo")};
-  variant<float, int, string> c{string{"bar"}};
-  variant<int, string, double> d{123};
+  caf::variant<int, string> a{42};
+  caf::variant<string, atom_value> b{atom("foo")};
+  caf::variant<float, int, string> c{string{"bar"}};
+  caf::variant<int, string, double> d{123};
   test_visitor f;
   CAF_CHECK_EQUAL(visit(f, a, b), "(42, 'foo')");
   CAF_CHECK_EQUAL(visit(f, a, b, c), "(42, 'foo', \"bar\")");
@@ -163,7 +163,7 @@ CAF_TEST(n_ary_visit) {
 }
 
 CAF_TEST(get_if) {
-  variant<int ,string, atom_value> b = atom("foo");
+  caf::variant<int ,string, atom_value> b = atom("foo");
   CAF_MESSAGE("test get_if directly");
   CAF_CHECK_EQUAL(get_if<int>(&b), nullptr);
   CAF_CHECK_EQUAL(get_if<string>(&b), nullptr);
@@ -175,7 +175,7 @@ CAF_TEST(get_if) {
 }
 
 CAF_TEST(less_than) {
-  using variant_type = variant<char, int>;
+  using variant_type = caf::variant<char, int>;
   auto a = variant_type{'x'};
   auto b = variant_type{'y'};
   CAF_CHECK(a < b);
@@ -196,7 +196,7 @@ CAF_TEST(less_than) {
 }
 
 CAF_TEST(equality) {
-  variant<uint16_t, int> x = 42;
-  variant<uint16_t, int> y = uint16_t{42};
+  caf::variant<uint16_t, int> x = 42;
+  caf::variant<uint16_t, int> y = uint16_t{42};
   CAF_CHECK_NOT_EQUAL(x, y);
 }

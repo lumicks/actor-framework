@@ -536,7 +536,7 @@ SERIALIZATION_TEST(non_empty_vector) {
 
 SERIALIZATION_TEST(variant_with_tree_types) {
   CAF_MESSAGE("deserializing into a non-empty vector overrides any content");
-  using test_variant = variant<int, double, std::string>;
+  using test_variant = caf::variant<int, double, std::string>;
   test_variant x{42};
   CAF_CHECK_EQUAL(x, roundtrip(x));
   x = 12.34;
