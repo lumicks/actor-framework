@@ -35,8 +35,13 @@ public:
   input_range(const input_range&) = default;
   input_range& operator=(const input_range&) = default;
 
-  class iterator : public std::iterator<std::input_iterator_tag, T> {
+  class iterator{
   public:
+    using difference_type = std::ptrdiff_t;
+    using value_type = T;
+    using pointer = T*;
+    using reference = T&;
+    using iterator_category = std::input_iterator_tag;
     iterator(input_range* range) : xs_(range) {
       if (xs_)
         advance();

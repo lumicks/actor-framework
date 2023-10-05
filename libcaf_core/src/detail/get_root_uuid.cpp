@@ -80,8 +80,12 @@ namespace detail {
 
 namespace {
 
-struct columns_iterator
-  : std::iterator<std::forward_iterator_tag, vector<string>> {
+struct columns_iterator{
+  using difference_type = std::ptrdiff_t;
+  using value_type = vector<string>;
+  using pointer = vector<string>*;
+  using reference = vector<string>&;
+  using iterator_category = std::forward_iterator_tag;
   columns_iterator(ifstream* s = nullptr) : fs(s) {
     // nop
   }
