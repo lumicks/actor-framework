@@ -205,7 +205,7 @@ int main() {
   }
   {
     // ---- general ----
-    auto dev = move(*opt);
+    auto dev = std::move(*opt);
     auto prog = mngr.create_program(kernel_source, "", dev);
     scoped_actor self{system};
     // ---- config parameters ----
@@ -243,7 +243,7 @@ int main() {
         return msg.apply([&](uref& data, uref& incs) {
           auto size = incs.size();
           range = nd_conf(size);
-          return make_message(move(data), move(incs), static_cast<uval>(size));
+          return make_message(std::move(data), std::move(incs), static_cast<uval>(size));
         });
       },
       in_out<uval,mref,mref>{},
@@ -256,7 +256,7 @@ int main() {
         return msg.apply([&](uref& data, uref& incs) {
           auto size = incs.size();
           range = nd_conf(size);
-          return make_message(move(data), move(incs), static_cast<uval>(size));
+          return make_message(std::move(data), std::move(incs), static_cast<uval>(size));
         });
       },
       in_out<uval,mref,val>{},

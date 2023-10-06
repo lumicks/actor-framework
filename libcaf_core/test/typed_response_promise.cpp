@@ -53,12 +53,12 @@ public:
 
   behavior_type make_behavior() override {
     return {
-      [=](int x) -> foo_promise {
+      [=, this](int x) -> foo_promise {
          auto resp = response(x * 2);
          CAF_CHECK(!resp.pending());
          return resp.deliver(x * 4); // has no effect
       },
-      [=](get_atom, int x) -> foo_promise {
+      [=, this](get_atom, int x) -> foo_promise {
         auto calculator = spawn([]() -> get1_helper::behavior_type {
           return {
             [](int promise_id, int value) -> result<put_atom, int, int> {
@@ -71,7 +71,7 @@ public:
         entry = make_response_promise<foo_promise>();
         return entry;
       },
-      [=](get_atom, int x, int y) -> foo2_promise {
+      [=, this](get_atom, int x, int y) -> foo2_promise {
         auto calculator = spawn([]() -> get2_helper::behavior_type {
           return {
             [](int promise_id, int v0, int v1) -> result<put_atom, int, int, int> {
@@ -92,21 +92,21 @@ public:
         CAF_CHECK(!tmp.pending());
         return entry;
       },
-      [=](get_atom, double) -> foo3_promise {
+      [=, this](get_atom, double) -> foo3_promise {
         auto resp = make_response_promise<double>();
         return resp.deliver(make_error(sec::unexpected_message));
       },
-      [=](get_atom, double x, double y) {
+      [=, this](get_atom, double x, double y) {
         return response(x * 2, y * 2);
       },
-      [=](put_atom, int promise_id, int x) {
+      [=, this](put_atom, int promise_id, int x) {
         auto i = promises_.find(promise_id);
         if (i == promises_.end())
           return;
         i->second.deliver(x);
         promises_.erase(i);
       },
-      [=](put_atom, int promise_id, int x, int y) {
+      [=, this](put_atom, int promise_id, int x, int y) {
         auto i = promises2_.find(promise_id);
         if (i == promises2_.end())
           return;

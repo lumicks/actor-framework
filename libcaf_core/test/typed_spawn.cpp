@@ -134,7 +134,7 @@ public:
   behavior_type wait4string() {
     return {
       [=](const get_state_msg&) { return "wait4string"; },
-      [=](const string&) { become(wait4int()); },
+      [=, this](const string&) { become(wait4int()); },
       [=](float) { return skip(); },
       [=](int) { return skip(); },
     };
@@ -143,7 +143,7 @@ public:
   behavior_type wait4int() {
     return {
       [=](const get_state_msg&) { return "wait4int"; },
-      [=](int) -> int {
+      [=, this](int) -> int {
         become(wait4float());
         return 42;
       },
@@ -155,7 +155,7 @@ public:
   behavior_type wait4float() {
     return {
       [=](const get_state_msg&) { return "wait4float"; },
-      [=](float) { become(wait4string()); },
+      [=, this](float) { become(wait4string()); },
       [=](const string&) { return skip(); },
       [=](int) { return skip(); },
     };

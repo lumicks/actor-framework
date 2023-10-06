@@ -68,9 +68,9 @@ platform_ptr platform::create(cl_platform_id platform_id,
   auto name = platform_info(platform_id, CL_PLATFORM_NAME);
   auto vendor = platform_info(platform_id, CL_PLATFORM_VENDOR);
   auto version = platform_info(platform_id, CL_PLATFORM_VERSION);
-  return make_counted<platform>(platform_id, move(context), move(name),
-                                move(vendor), move(version),
-                                move(device_information));
+  return make_counted<platform>(platform_id, std::move(context), std::move(name),
+                                std::move(vendor), std::move(version),
+                                std::move(device_information));
 }
 
 string platform::platform_info(cl_platform_id platform_id,
@@ -90,10 +90,10 @@ platform::platform(cl_platform_id platform_id, detail::raw_context_ptr context,
                    vector<device_ptr> devices)
   : platform_id_(platform_id),
     context_(std::move(context)),
-    name_(move(name)),
-    vendor_(move(vendor)),
-    version_(move(version)),
-    devices_(move(devices)) {
+    name_(std::move(name)),
+    vendor_(std::move(vendor)),
+    version_(std::move(version)),
+    devices_(std::move(devices)) {
   // nop
 }
 

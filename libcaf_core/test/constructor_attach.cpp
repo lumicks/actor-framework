@@ -33,14 +33,14 @@ using done_atom = atom_constant<atom("done")>;
 class testee : public event_based_actor {
 public:
   testee(actor_config& cfg, actor buddy) : event_based_actor(cfg) {
-    attach_functor([=](const error& reason) {
+    attach_functor([=, this](const error& reason) {
       send(buddy, done_atom::value, reason);
     });
   }
 
   behavior make_behavior() override {
     return {
-      [=](die_atom) {
+      [=, this](die_atom) {
         quit(exit_reason::user_shutdown);
       }
     };
@@ -53,7 +53,7 @@ public:
       : event_based_actor(cfg),
         downs_(0),
         testee_(spawn<testee, monitored>(this)) {
-    set_down_handler([=](down_msg& msg) {
+    set_down_handler([=, this](down_msg& msg) {
       CAF_CHECK_EQUAL(msg.reason, exit_reason::user_shutdown);
       CAF_CHECK_EQUAL(msg.source, testee_.address());
       if (++downs_ == 2)
@@ -63,13 +63,13 @@ public:
 
   behavior make_behavior() override {
     return {
-      [=](done_atom, const error& reason) {
+      [=, this](done_atom, const error& reason) {
         CAF_CHECK_EQUAL(reason, exit_reason::user_shutdown);
         if (++downs_ == 2) {
           quit(reason);
         }
       },
-      [=](die_atom x) {
+      [=, this](die_atom x) {
         return delegate(testee_, x);
       }
     };

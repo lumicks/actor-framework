@@ -67,8 +67,8 @@ template <class T, class = typename std::enable_if<
 T get_or(const settings& xs, string_view name, T default_value) {
   auto result = get_if<T>(&xs, name);
   if (result)
-    return std::move(*result);
-  return std::move(default_value);
+    return *result;
+  return default_value;
 }
 
 std::string get_or(const settings& xs, string_view name,

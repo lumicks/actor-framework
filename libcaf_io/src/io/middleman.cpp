@@ -294,7 +294,7 @@ void middleman::start() {
 
 void middleman::stop() {
   CAF_LOG_TRACE("");
-  backend().dispatch([=] {
+  backend().dispatch([=, this] {
     CAF_LOG_TRACE("");
     // managers_ will be modified while we are stopping each manager,
     // because each manager will call remove(...)
@@ -356,7 +356,7 @@ void middleman::init(actor_system_config& cfg) {
   private:
     middleman& parent_;
   };
-  auto gfactory = [=]() -> group_module* { return new remote_groups(*this); };
+  auto gfactory = [=, this]() -> group_module* { return new remote_groups(*this); };
   cfg.group_module_factories.emplace_back(gfactory);
   // logging not available at this stage
   // add I/O-related types to config

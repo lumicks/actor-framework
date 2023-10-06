@@ -80,8 +80,12 @@ namespace detail {
 
 namespace {
 
-struct columns_iterator
-  : std::iterator<std::forward_iterator_tag, vector<string>> {
+struct columns_iterator{
+  using difference_type = std::ptrdiff_t;
+  using value_type = vector<string>;
+  using pointer = vector<string>*;
+  using reference = vector<string>&;
+  using iterator_category = std::forward_iterator_tag;
   columns_iterator(ifstream* s = nullptr) : fs(s) {
     // nop
   }
@@ -116,11 +120,11 @@ std::string get_root_uuid() {
   ifstream fs;
   fs.open("/etc/fstab", std::ios_base::in);
   columns_iterator end;
-  auto i = find_if(columns_iterator{&fs}, end, [](const vector<string>& cols) {
+  auto i = std::find_if(columns_iterator{&fs}, end, [](const vector<string>& cols) {
     return cols.size() == 6 && cols[1] == "/";
   });
   if (i != end) {
-    uuid = move((*i)[0]);
+    uuid = std::move((*i)[0]);
     const char cstr[] = {"UUID="};
     auto slen = sizeof(cstr) - 1;
     if (uuid.compare(0, slen, cstr) == 0) {

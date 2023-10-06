@@ -128,7 +128,7 @@ public:
       [](unit_t&) {
         // nop
       },
-      [=](unit_t&, int x) { buf.emplace_back(x); });
+      [=, this](unit_t&, int x) { buf.emplace_back(x); });
     return unit;
   }
 };

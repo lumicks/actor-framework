@@ -56,6 +56,7 @@
 
 #include <array>
 #include <string>
+#include <cstdint>
 
 namespace caf {
 namespace detail {
