@@ -37,6 +37,7 @@
 #include "caf/actor_traits.hpp"
 #include "caf/composable_behavior_based_actor.hpp"
 #include "caf/detail/init_fun_factory.hpp"
+#include "caf/detail/private_thread_pool.hpp"
 #include "caf/detail/spawn_fwd.hpp"
 #include "caf/detail/spawnable.hpp"
 #include "caf/fwd.hpp"
@@ -507,20 +508,9 @@ public:
   }
 
   /// Returns the number of detached actors.
-  size_t detached_actors() {
-    return detached_.load();
-  }
+  size_t detached_actors() const noexcept;
 
   /// @cond PRIVATE
-
-  /// Increases running-detached-threads-count by one.
-  void inc_detached_threads();
-
-  /// Decreases running-detached-threads-count by one.
-  void dec_detached_threads();
-
-  /// Blocks the caller until all detached threads are done.
-  void await_detached_threads();
 
   /// Calls all thread started hooks
   /// @warning must be called by thread which is about to start
@@ -588,6 +578,10 @@ public:
       profiler_->before_sending_scheduled(self, timeout, element);
   }
 
+  detail::private_thread* acquire_private_thread();
+
+  void release_private_thread(detail::private_thread*);
+
   /// @endcond
 
 private:
@@ -649,15 +643,6 @@ private:
   /// Stores SpawnServ, ConfigServ, and StreamServ.
   std::array<strong_actor_ptr, num_internal_actors> internal_actors_;
 
-  /// Counts the number of detached actors.
-  std::atomic<size_t> detached_;
-
-  /// Guards `detached`.
-  mutable std::mutex detached_mtx_;
-
-  /// Allows waiting on specific values for `detached`.
-  mutable std::condition_variable detached_cv_;
-
   /// The system-wide, user-provided configuration.
   actor_system_config& cfg_;
 
@@ -673,6 +658,9 @@ private:
 
   /// Stores custom, system-wide key-value pairs.
   runtime_settings_map settings_;
+
+  /// Manages threads for detached actors.
+  detail::private_thread_pool private_threads_;
 };
 
 } // namespace caf

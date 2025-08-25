@@ -73,6 +73,7 @@ set(LIBCAF_CORE_SRCS
   src/detail/parser/chars.cpp
   src/detail/pretty_type_name.cpp
   src/detail/private_thread.cpp
+  src/detail/private_thread_pool.cpp
   src/detail/ripemd_160.cpp
   src/detail/serialized_size.cpp
   src/detail/set_thread_name.cpp

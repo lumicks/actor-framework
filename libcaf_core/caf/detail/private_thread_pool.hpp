@@ -5,7 +5,7 @@
  *                     | |___ / ___ \|  _|      Framework                     *
  *                      \____/_/   \_|_|                                      *
  *                                                                            *
- * Copyright 2011-2018 Dominik Charousset                                     *
+ * Copyright 2011-2021 Dominik Charousset                                     *
  *                                                                            *
  * Distributed under the terms and conditions of the BSD 3-Clause License or  *
  * (at your option) under the terms and conditions of the Boost Software      *
@@ -20,34 +20,49 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <forward_list>
 #include <mutex>
 #include <thread>
 
-#include "caf/detail/private_thread_pool.hpp"
 #include "caf/fwd.hpp"
 
 namespace caf::detail {
 
-class private_thread : public private_thread_pool::node {
+class private_thread_pool {
 public:
-  void resume(resumable* ptr);
+  struct node {
+    virtual ~node();
+    node* next = nullptr;
+    // Called by the private thread pool to stop the node. Regular nodes should
+    // return true. Returning false signals the thread pool to shut down.
+    virtual bool stop() = 0;
+  };
 
-  bool stop() override;
+  explicit private_thread_pool(actor_system* sys) : sys_(sys), running_(0) {
+    // nop
+  }
 
-  static private_thread* launch(actor_system* sys);
+  void start();
+
+  void stop();
+
+  void run_loop();
+
+  private_thread* acquire();
+
+  void release(private_thread*);
+
+  size_t running() const noexcept;
 
 private:
-  void run(actor_system* sys);
+  std::pair<node*, size_t> dequeue();
 
-  static void exec(actor_system* sys, private_thread* this_ptr);
-
-  std::pair<resumable*, bool> await();
-
-  std::thread thread_;
-  std::mutex mtx_;
+  actor_system* sys_;
+  std::thread loop_;
+  mutable std::mutex mtx_;
   std::condition_variable cv_;
-  resumable* job_ = nullptr;
-  bool shutdown_ = false;
+  node* head_ = nullptr;
+  size_t running_;
 };
 
 } // namespace caf::detail

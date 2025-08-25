@@ -224,9 +224,9 @@ actor_system::actor_system(actor_system_config& cfg)
     groups_(*this),
     dummy_execution_unit_(this),
     await_actors_before_shutdown_(true),
-    detached_(0),
     cfg_(cfg),
-    logger_dtor_done_(false) {
+    logger_dtor_done_(false),
+    private_threads_(this) {
   CAF_SET_LOGGER_SYS(this);
   for (auto& hook : cfg.thread_hooks_)
     hook->init(*this);
@@ -297,6 +297,7 @@ actor_system::actor_system(actor_system_config& cfg)
   config_serv(actor_cast<strong_actor_ptr>(spawn<Flags>(config_serv_impl)));
   // fire up remaining modules
   registry_.start();
+  private_threads_.start();
   registry_.put(atom("SpawnServ"), spawn_serv());
   registry_.put(atom("ConfigServ"), config_serv());
   for (auto& mod : modules_)
@@ -330,7 +331,7 @@ actor_system::~actor_system() {
         ptr->stop();
       }
     }
-    await_detached_threads();
+    private_threads_.stop();
     registry_.stop();
   }
   // reset logger and wait until dtor was called
@@ -442,25 +443,21 @@ actor_clock& actor_system::clock() noexcept {
   return scheduler().clock();
 }
 
-void actor_system::inc_detached_threads() {
-  ++detached_;
-}
-
-void actor_system::dec_detached_threads() {
-  std::unique_lock<std::mutex> guard{detached_mtx_};
-  if (--detached_ == 0)
-    detached_cv_.notify_all();
-}
-
-void actor_system::await_detached_threads() {
-  std::unique_lock<std::mutex> guard{detached_mtx_};
-  while (detached_ != 0)
-    detached_cv_.wait(guard);
+size_t actor_system::detached_actors() const noexcept {
+  return private_threads_.running();
 }
 
 void actor_system::thread_started() {
   for (auto& hook : cfg_.thread_hooks_)
     hook->thread_started();
+}
+
+detail::private_thread* actor_system::acquire_private_thread() {
+  return private_threads_.acquire();
+}
+
+void actor_system::release_private_thread(detail::private_thread* ptr) {
+  private_threads_.release(ptr);
 }
 
 void actor_system::thread_terminates() {

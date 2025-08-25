@@ -354,6 +354,8 @@ public:
     receive_for(i, expected)(&workaround::wait_for_nop);
   }
 
+  using super::fail_state;
+
   /// Sets a user-defined exit reason `err`. This reason
   /// is signalized to other actors after `act()` returns.
   void fail_state(error err);
@@ -457,4 +459,3 @@ private:
 };
 
 } // namespace caf
-
