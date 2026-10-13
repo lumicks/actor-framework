@@ -7,7 +7,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 
 class CAFConan(ConanFile):
     name = "caf"
-    version = "0.17.4-lmx.15"
+    version = "0.17.4-lmx.16"
     description = "An open source implementation of the Actor Model in C++"
     url = "https://github.com/bincrafters/conan-caf"
     homepage = "https://github.com/actor-framework/actor-framework"
