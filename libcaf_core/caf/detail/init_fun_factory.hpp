@@ -130,10 +130,9 @@ public:
     using tuple_type = decltype(std::make_tuple(detail::spawn_fwd<Ts>(xs)...));
     using tuple_ptr = std::shared_ptr<tuple_type>;
     using helper = init_fun_factory_helper<Base, F, tuple_ptr, rets, selfptr>;
-    return ptr_type{new helper{std::move(f), sizeof...(Ts) > 0
-                                             ? std::make_shared<tuple_type>(
-                                                 detail::spawn_fwd<Ts>(xs)...)
-                                             : nullptr}};
+    return ptr_type{new helper{
+      std::move(f),
+      std::make_shared<tuple_type>(detail::spawn_fwd<Ts>(xs)...)}};
   }
 
   template <class... Ts>
@@ -144,4 +143,3 @@ public:
 
 } // namespace detail
 } // namespace caf
-
